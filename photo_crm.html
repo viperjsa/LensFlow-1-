@@ -439,7 +439,49 @@
     white-space:nowrap;
   }
 
-  /* CALENDAR */
+  /* PRODUCT ITEMS */
+  .items-table { width:100%; border-collapse:collapse; }
+  .items-table th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted); padding:6px 10px; border-bottom:1px solid var(--border); font-weight:400; }
+  .items-table th:last-child, .items-table td:last-child { text-align:right; }
+  .items-table td { padding:10px; border-bottom:1px solid var(--border); font-size:13px; }
+  .items-table tr:last-child td { border-bottom:none; }
+  .items-table .item-total { font-weight:500; color:var(--text); }
+  .items-table .item-del { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; transition:color 0.15s; }
+  .items-table .item-del:hover { color:var(--red); }
+
+  /* NOTES */
+  .notes-layout {
+    display:grid; grid-template-columns:280px 1fr;
+    gap:16px; height:calc(100vh - 180px); min-height:400px;
+  }
+  .notes-list-col { display:flex; flex-direction:column; overflow:hidden; }
+  .notes-editor-col {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:20px;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .note-item {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:13px 14px; cursor:pointer;
+    margin-bottom:8px; transition:all 0.15s; position:relative;
+    overflow:hidden;
+  }
+  .note-item::before {
+    content:''; position:absolute; left:0; top:0; bottom:0;
+    width:3px; border-radius:3px 0 0 3px;
+    background:transparent; transition:background 0.15s;
+  }
+  .note-item.has-color::before { background:var(--note-color); }
+  .note-item:hover { border-color:var(--gold); }
+  .note-item.active { border-color:var(--gold); background:var(--gold-dim); }
+  .note-item-title { font-size:13px; font-weight:500; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .note-item-preview { font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .note-item-date { font-size:10px; color:var(--text-muted); margin-top:5px; }
+
+  @media (max-width:1100px) {
+    .notes-layout { grid-template-columns:1fr; height:auto; }
+    .notes-editor-col { min-height:400px; }
+  }
   .cal-nav-btn {
     background:var(--surface2); border:1px solid var(--border); border-radius:6px;
     width:28px; height:28px; cursor:pointer; color:var(--text-muted);
@@ -642,6 +684,26 @@
 </head>
 <body>
 
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity 0.4s">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 217.87" style="width:180px;opacity:0.9">
+    <g fill="var(--gold)">
+      <path d="m98.93,66.97c9.83-4.34,21.9-1.96,28.93,6.38,1.85,2.2,5.14,2.48,7.34.62,2.2-1.85,2.48-5.14.62-7.34-11.69-13.86-33.06-16.21-47.77-5.32,0,0-.02.01-.03.02-.06.04-.12.08-.18.13-7.29,5.48-11.85,13.35-12.84,22.14-.98,8.66,1.64,17.17,7.37,23.97l36.56,43.33c-9.83,4.34-21.9,1.96-28.94-6.38-1.85-2.2-5.14-2.48-7.34-.62-2.2,1.85-2.48,5.14-.62,7.34,6.75,8,16.72,12.16,26.78,12.16,7.45,0,14.94-2.29,21.2-6.99,7.29-5.48,11.85-13.35,12.84-22.14.98-8.66-1.64-17.18-7.37-23.97l-36.56-43.33Zm33.58,66.13c-.49,4.32-2.28,8.33-5.15,11.63l-37.02-43.88c-3.86-4.58-5.63-10.29-4.98-16.08.49-4.32,2.28-8.33,5.15-11.63l37.02,43.88c3.86,4.58,5.63,10.29,4.98,16.08Z"/>
+      <path d="m108.93,0C48.77,0,0,48.77,0,108.94s48.77,108.94,108.94,108.94,108.94-48.77,108.94-108.94S169.1,0,108.93,0Zm0,206.98c-54.06,0-98.04-43.98-98.04-98.04S54.87,10.89,108.93,10.89s98.04,43.98,98.04,98.04-43.98,98.04-98.04,98.04Z"/>
+      <path d="m295.06,137.33l7.84-10.81c5.35,5.82,14.02,11.05,25.07,11.05s15.8-5.58,15.8-10.93c0-16.63-46.09-6.3-46.09-35.4,0-13.19,11.4-23.28,28.87-23.28,12.24,0,22.33,4.04,29.58,11.17l-7.84,10.34c-6.3-6.3-14.73-9.15-23.05-9.15s-13.31,4.04-13.31,9.86c0,14.85,46.09,5.7,46.09,35.16,0,13.19-9.39,24.59-30.65,24.59-14.61,0-25.19-5.23-32.31-12.59Z"/>
+      <path d="m437.02,148.49l-5.82-15.32h-36.35l-5.82,15.32h-15.8l31.12-79.24h17.34l31.12,79.24h-15.8Zm-24-65.34l-14.26,37.78h28.51l-14.26-37.78Z"/>
+      <path d="m472.3,148.49v-79.24h13.9v67h34.93v12.24h-48.82Z"/>
+      <path d="m545.24,148.49v-79.24h13.9v79.24h-13.9Z"/>
+      <path d="m584.45,108.94c0-24.47,18.18-40.98,41.58-40.98,15.92,0,25.9,8.2,31.72,17.7l-11.76,6.18c-3.8-6.65-11.52-11.52-19.96-11.52-15.68,0-27.32,11.88-27.32,28.63s11.64,28.63,27.32,28.63c8.44,0,16.16-4.99,19.96-11.52l11.88,5.94c-6.06,9.5-15.92,17.94-31.84,17.94-23.4,0-41.58-16.63-41.58-40.98Z"/>
+      <path d="m735.79,148.49l-5.82-15.32h-36.35l-5.82,15.32h-15.8l31.12-79.24h17.34l31.12,79.24h-15.8Zm-24-65.34l-14.26,37.78h28.51l-14.26-37.78Z"/>
+      <path d="m783.2,148.49v-67h-24v-12.24h61.89v12.24h-24v67h-13.9Z"/>
+      <path d="m844.73,117.13v-47.87h14.14v47.52c0,12.59,7.01,20.79,20.2,20.79s20.2-8.2,20.2-20.79v-47.52h14.14v47.87c0,19.6-11.29,32.79-34.33,32.79s-34.33-13.19-34.33-32.79Z"/>
+      <path d="m937.04,137.33l7.84-10.81c5.35,5.82,14.02,11.05,25.07,11.05s15.8-5.58,15.8-10.93c0-16.63-46.09-6.3-46.09-35.4,0-13.19,11.4-23.28,28.87-23.28,12.24,0,22.33,4.04,29.58,11.17l-7.84,10.34c-6.3-6.3-14.73-9.15-23.05-9.15s-13.31,4.04-13.31,9.86c0,14.85,46.09,5.7,46.09,35.16,0,13.19-9.39,24.59-30.65,24.59-14.61,0-25.19-5.23-32.31-12.59Z"/>
+    </g>
+  </svg>
+  <div style="font-size:12px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase" id="loading-text">Cargando…</div>
+</div>
+
 <!-- MOBILE TOPBAR (visible only on mobile) -->
 <div class="mobile-topbar" id="mobile-topbar">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 217.87" style="height:28px;width:auto">
@@ -723,6 +785,14 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
       Paquetes
     </button>
+    <button class="nav-item" onclick="showPage('catalogo',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Catálogo
+    </button>
+    <button class="nav-item" onclick="showPage('notas',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Notas
+    </button>
   </div>
   <div class="sidebar-footer">
     <div class="photographer-name">Mi Estudio</div>
@@ -743,6 +813,7 @@
       <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importBackup(event)">
     </div>
     <div id="save-indicator" style="font-size:10px;color:var(--text-muted);margin-top:10px;transition:color 0.4s">● Datos guardados localmente</div>
+    <div id="sync-status" style="font-size:10px;color:var(--text-muted);margin-top:4px;transition:color 0.4s">☁ En la nube</div>
     <button onclick="resetData()" style="margin-top:8px;background:none;border:none;color:var(--text-muted);font-size:10px;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;text-decoration:underline;text-underline-offset:2px" title="Borra todos los datos y regresa a los datos de ejemplo">↺ Restablecer datos</button>
   </div>
 </nav>
@@ -905,7 +976,142 @@
     <div id="packages-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px"></div>
   </div>
 
+  <!-- NOTAS -->
+  <div class="page" id="page-notas">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Notas</div>
+        <div class="page-subtitle" id="notes-count-label"></div>
+      </div>
+      <button class="btn btn-gold" onclick="newNote()">+ Nueva nota</button>
+    </div>
+    <div class="notes-layout">
+      <!-- Sidebar list -->
+      <div class="notes-list-col">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;margin-bottom:10px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="notes-search" placeholder="Buscar…" oninput="filterNotes(this.value)" style="background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;width:100%" autocomplete="off">
+        </div>
+        <div id="notes-list"></div>
+      </div>
+      <!-- Editor -->
+      <div class="notes-editor-col" id="notes-editor-col">
+        <div id="notes-empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:12px">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span style="font-size:14px">Selecciona una nota o crea una nueva</span>
+        </div>
+        <div id="notes-editor-content" style="display:none;height:100%;display:none;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <input class="form-input" id="note-title-input" placeholder="Título de la nota…" style="flex:1;font-size:16px;font-weight:500" oninput="onNoteTitleInput()">
+            <div style="display:flex;gap:8px">
+              <select class="date-select" id="note-color-select" onchange="onNoteColorChange()" title="Color de etiqueta">
+                <option value="">Sin color</option>
+                <option value="#c9a84c">🟡 Dorado</option>
+                <option value="#4caf7d">🟢 Verde</option>
+                <option value="#5a8fe0">🔵 Azul</option>
+                <option value="#c05ae0">🟣 Morado</option>
+                <option value="#e05a5a">🔴 Rojo</option>
+                <option value="#e0a05a">🟠 Naranja</option>
+              </select>
+              <button class="btn btn-danger btn-sm" id="note-delete-btn" onclick="deleteActiveNote()">✕ Eliminar</button>
+            </div>
+          </div>
+          <textarea id="note-body-input" class="notes-area" style="flex:1;resize:none;font-size:14px;line-height:1.7;min-height:0" placeholder="Escribe tu nota aquí…" oninput="onNoteBodyInput()"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <span id="note-meta" style="font-size:11px;color:var(--text-muted)"></span>
+            <span id="note-autosave-indicator" style="font-size:11px;color:var(--text-muted)">● Guardado automático</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CATÁLOGO -->
+  <div class="page" id="page-catalogo">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Catálogo</div>
+        <div class="page-subtitle" id="catalog-count-label"></div>
+      </div>
+      <button class="btn btn-gold" onclick="openCatalogItemModal()">+ Nuevo producto</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="clients-table" id="catalog-table">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>Nombre / Descripción</th>
+            <th style="text-align:right">Precio unitario</th>
+            <th style="width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="catalog-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
 </main>
+
+<!-- MODAL CATÁLOGO ITEM -->
+<div class="modal-overlay" id="catalog-item-modal-overlay" style="z-index:1100">
+  <div class="modal" style="width:420px">
+    <div class="modal-title" id="catalog-item-modal-title">Nuevo producto / servicio</div>
+    <input type="hidden" id="ci-editing-id">
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input class="form-input" id="ci-desc" placeholder="Ej. Photobook 20×20, Marco 40×50…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Precio unitario ($)</label>
+      <input class="form-input" id="ci-price" type="number" min="0" placeholder="800">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="ci-delete-btn" style="margin-right:auto;display:none" onclick="deleteCatalogItem()">✕ Eliminar</button>
+      <button class="btn btn-outline" onclick="closeCatalogItemModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveCatalogItem()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR PRODUCTO AL CLIENTE -->
+<div class="modal-overlay" id="client-item-modal-overlay" style="z-index:1100">
+  <div class="modal" style="width:480px">
+    <div class="modal-title" id="client-item-modal-title">Agregar producto</div>
+    <input type="hidden" id="cim-client-id">
+    <input type="hidden" id="cim-item-id">
+    <div class="form-group">
+      <label class="form-label">Producto / servicio</label>
+      <div style="display:flex;gap:8px">
+        <select class="form-input" id="cim-catalog-select" onchange="onCatalogSelectChange()" style="flex:1">
+          <option value="">— Seleccionar del catálogo —</option>
+        </select>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openCatalogItemModal()" title="Agregar al catálogo" style="white-space:nowrap">+ Catálogo</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción personalizada (opcional)</label>
+      <input class="form-input" id="cim-desc" placeholder="O escribe una descripción libre…">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cantidad</label>
+        <input class="form-input" id="cim-qty" type="number" min="1" value="1" oninput="updateClientItemSubtotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Precio unitario ($)</label>
+        <input class="form-input" id="cim-price" type="number" min="0" placeholder="0" oninput="updateClientItemSubtotal()">
+      </div>
+    </div>
+    <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:12px;color:var(--text-muted)">Subtotal</span>
+      <span style="font-size:16px;font-weight:600;color:var(--gold)" id="cim-subtotal">$0</span>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-danger btn-sm" id="cim-delete-btn" style="margin-right:auto;display:none" onclick="deleteClientItem()">✕ Eliminar</button>
+      <button class="btn btn-outline" onclick="closeClientItemModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="saveClientItem()">Agregar al cliente</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL PAQUETE -->
 <div class="modal-overlay" id="pkg-modal-overlay">
@@ -1183,20 +1389,57 @@
 </div>
 
 <script>
-// ───── PERSISTENCIA localStorage ─────
+// ───── SUPABASE CONFIG ─────
+// ⚠ Reemplaza estos valores con los de tu proyecto en supabase.com → Settings → API
+const SUPABASE_URL = 'https://vjouylamnbtgcoojyvpd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_3MhAJlA7hnc0ibu57sTBuA_LtnGc4fj';
+
+const sbHeaders = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Prefer': 'resolution=merge-duplicates'
+};
+
+const supabaseConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL';
+
+async function sbGet(key) {
+  if(!supabaseConfigured) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/app_data?key=eq.${key}&select=value`, { headers: sbHeaders });
+    if(!res.ok) return null;
+    const rows = await res.json();
+    return rows.length ? rows[0].value : null;
+  } catch(e) { return null; }
+}
+
+async function sbSet(key, value) {
+  if(!supabaseConfigured) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+      method: 'POST',
+      headers: sbHeaders,
+      body: JSON.stringify({ key, value })
+    });
+  } catch(e) { console.warn('Supabase write error:', e); }
+}
+
+// ───── PERSISTENCIA (localStorage + Supabase) ─────
 const LS_CLIENTS   = 'lensflow_clients';
 const LS_PACKAGES  = 'lensflow_packages';
 const LS_NEXTID    = 'lensflow_nextid';
 const LS_PKGNEXTID = 'lensflow_pkgnextid';
 const LS_ADDONS    = 'lensflow_custom_addons';
+const LS_NOTES     = 'lensflow_notes';
+const LS_CATALOG   = 'lensflow_catalog';
 
 const DEFAULT_CLIENTS = [
-  { id:1, name:'Diana & Carlos Reyes', phone:'55 4521 8900', type:'boda', date:'2026-04-19', venue:'Hacienda San Miguel, Cuernavaca', package:'Elite', sessionDate:'2026-03-10', sessionDone:true, addons:['Álbum impreso','Video highlight','Drone'], total:38000, paid:19000, notes:'Prefieren fotos en exteriores al atardecer. Vestimenta color marfil y azul navy.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p1',amount:19000,date:'2026-01-15',type:'Anticipo',method:'Transferencia',note:''}] },
-  { id:2, name:'Sofía Martínez', phone:'55 9012 3456', type:'xv', date:'2026-05-03', venue:'Salón Imperial, CDMX', package:'Premium', sessionDate:'2026-04-05', sessionDone:false, addons:['Cabina de fotos','Video highlight'], total:26000, paid:13000, notes:'Temática París. Color rosa palo y dorado.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p2',amount:13000,date:'2026-02-10',type:'Anticipo',method:'Efectivo',note:''}] },
-  { id:3, name:'Roberto Jiménez', phone:'55 7788 1122', type:'graduacion', date:'2026-04-08', venue:'Campus UNAM, Ciudad de México', package:'Estándar', sessionDate:'', sessionDone:false, addons:['Entrega express'], total:15500, paid:15500, notes:'Ceremonia y convivio. Requiere entrega en menos de 5 días.', status:'completado', delivered:true, galleryLink:'https://galeria.ejemplo.com/roberto2026', payments:[{id:'p3',amount:8000,date:'2026-01-20',type:'Anticipo',method:'Transferencia',note:''},{id:'p4',amount:7500,date:'2026-04-06',type:'Liquidación',method:'Transferencia',note:''}] },
-  { id:4, name:'Familia Torres', phone:'55 3344 5566', type:'bautizo', date:'2026-06-14', venue:'Parroquia San José, Tlalpan', package:'Básico', sessionDate:'', sessionDone:false, addons:[], total:8000, paid:4000, notes:'Bautizo en misa de 12pm, convivio en jardín.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p5',amount:4000,date:'2026-03-01',type:'Anticipo',method:'Efectivo',note:''}] },
-  { id:5, name:'InnoTech Solutions', phone:'55 6677 8899', type:'corporativo', date:'2026-05-22', venue:'Hotel Camino Real, CDMX', package:'Estándar', sessionDate:'', sessionDone:false, addons:['Segunda cámara'], total:18000, paid:9000, notes:'Evento de lanzamiento de producto. 200 asistentes aprox.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p6',amount:9000,date:'2026-02-28',type:'Anticipo',method:'Tarjeta de crédito',note:''}] },
-  { id:6, name:'Valentina & Luis Mora', phone:'55 2233 4455', type:'boda', date:'2026-04-26', venue:'Jardines del Pedregal', package:'Premium', sessionDate:'2026-03-29', sessionDone:false, addons:['Drone','Segunda cámara','Entrega express'], total:28000, paid:14000, notes:'Ceremonia al aire libre. Contingencia por lluvia ya coordinada.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p7',amount:14000,date:'2026-01-30',type:'Anticipo',method:'Transferencia',note:''}] },
+  { id:1, name:'Diana & Carlos Reyes', phone:'55 4521 8900', type:'boda', date:'2026-04-19', venue:'Hacienda San Miguel, Cuernavaca', package:'Elite', sessionDate:'2026-03-10', sessionDone:true, addons:['Álbum impreso','Video highlight','Drone'], total:38000, paid:19000, notes:'Prefieren fotos en exteriores al atardecer. Vestimenta color marfil y azul navy.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p1',amount:19000,date:'2026-01-15',type:'Anticipo',method:'Transferencia',note:''}], clientItems:[], baseTotal:38000 },
+  { id:2, name:'Sofía Martínez', phone:'55 9012 3456', type:'xv', date:'2026-05-03', venue:'Salón Imperial, CDMX', package:'Premium', sessionDate:'2026-04-05', sessionDone:false, addons:['Cabina de fotos','Video highlight'], total:26000, paid:13000, notes:'Temática París. Color rosa palo y dorado.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p2',amount:13000,date:'2026-02-10',type:'Anticipo',method:'Efectivo',note:''}], clientItems:[], baseTotal:26000 },
+  { id:3, name:'Roberto Jiménez', phone:'55 7788 1122', type:'graduacion', date:'2026-04-08', venue:'Campus UNAM, Ciudad de México', package:'Estándar', sessionDate:'', sessionDone:false, addons:['Entrega express'], total:15500, paid:15500, notes:'Ceremonia y convivio. Requiere entrega en menos de 5 días.', status:'completado', delivered:true, galleryLink:'https://galeria.ejemplo.com/roberto2026', payments:[{id:'p3',amount:8000,date:'2026-01-20',type:'Anticipo',method:'Transferencia',note:''},{id:'p4',amount:7500,date:'2026-04-06',type:'Liquidación',method:'Transferencia',note:''}], clientItems:[], baseTotal:15500 },
+  { id:4, name:'Familia Torres', phone:'55 3344 5566', type:'bautizo', date:'2026-06-14', venue:'Parroquia San José, Tlalpan', package:'Básico', sessionDate:'', sessionDone:false, addons:[], total:8000, paid:4000, notes:'Bautizo en misa de 12pm, convivio en jardín.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p5',amount:4000,date:'2026-03-01',type:'Anticipo',method:'Efectivo',note:''}], clientItems:[], baseTotal:8000 },
+  { id:5, name:'InnoTech Solutions', phone:'55 6677 8899', type:'corporativo', date:'2026-05-22', venue:'Hotel Camino Real, CDMX', package:'Estándar', sessionDate:'', sessionDone:false, addons:['Segunda cámara'], total:18000, paid:9000, notes:'Evento de lanzamiento de producto. 200 asistentes aprox.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p6',amount:9000,date:'2026-02-28',type:'Anticipo',method:'Tarjeta de crédito',note:''}], clientItems:[], baseTotal:18000 },
+  { id:6, name:'Valentina & Luis Mora', phone:'55 2233 4455', type:'boda', date:'2026-04-26', venue:'Jardines del Pedregal', package:'Premium', sessionDate:'2026-03-29', sessionDone:false, addons:['Drone','Segunda cámara','Entrega express'], total:28000, paid:14000, notes:'Ceremonia al aire libre. Contingencia por lluvia ya coordinada.', status:'activo', delivered:false, galleryLink:'', payments:[{id:'p7',amount:14000,date:'2026-01-30',type:'Anticipo',method:'Transferencia',note:''}], clientItems:[], baseTotal:28000 },
 ];
 const DEFAULT_PACKAGES = [
   {id:'basico',   name:'Básico',   price:8000,  hours:4,  photos:150, color:'#7a7570', features:['4h cobertura','150 fotos editadas','Galería digital','Entrega en 15 días']},
@@ -1205,36 +1448,115 @@ const DEFAULT_PACKAGES = [
   {id:'elite',    name:'Elite',    price:32000, hours:16, photos:800, color:'#e0a05a', features:['16h cobertura','800 fotos editadas','Álbum de lujo impreso','Entrega en 5 días','Sesión previa ilimitada','Video cinematic','Segunda cámara']},
 ];
 
+function migrateClients(arr) {
+  arr.forEach(c => {
+    if(!c.payments)    c.payments    = [];
+    if(!c.clientItems) c.clientItems = [];
+    if(!c.baseTotal)   c.baseTotal   = c.total;
+  });
+  return arr;
+}
+
+// Load from localStorage (sync, instant)
 function lsLoad() {
   try {
-    const loadedClients = JSON.parse(localStorage.getItem(LS_CLIENTS)) || DEFAULT_CLIENTS;
-    // Migration: ensure every client has payments array
-    loadedClients.forEach(c => {
-      if(!c.payments) c.payments = [];
-    });
+    const loadedClients = migrateClients(JSON.parse(localStorage.getItem(LS_CLIENTS)) || DEFAULT_CLIENTS);
     return {
       clients:      loadedClients,
       packagesData: JSON.parse(localStorage.getItem(LS_PACKAGES))  || DEFAULT_PACKAGES,
       nextId:       JSON.parse(localStorage.getItem(LS_NEXTID))    || 7,
       pkgNextId:    JSON.parse(localStorage.getItem(LS_PKGNEXTID)) || 10,
       customAddons: JSON.parse(localStorage.getItem(LS_ADDONS))    || [],
+      notes:        JSON.parse(localStorage.getItem(LS_NOTES))     || [],
+      catalog:      JSON.parse(localStorage.getItem(LS_CATALOG))   || [],
     };
   } catch(e) {
-    return { clients: DEFAULT_CLIENTS, packagesData: DEFAULT_PACKAGES, nextId: 7, pkgNextId: 10, customAddons: [] };
+    return { clients: DEFAULT_CLIENTS, packagesData: DEFAULT_PACKAGES, nextId: 7, pkgNextId: 10, customAddons: [], notes: [], catalog: [] };
   }
 }
 
+// Save to localStorage (sync) + push to Supabase (async, non-blocking)
 function lsSave() {
+  // Always save to localStorage first (instant, offline-safe)
   try {
     localStorage.setItem(LS_CLIENTS,   JSON.stringify(clients));
     localStorage.setItem(LS_PACKAGES,  JSON.stringify(packagesData));
     localStorage.setItem(LS_NEXTID,    JSON.stringify(nextId));
     localStorage.setItem(LS_PKGNEXTID, JSON.stringify(pkgNextId));
     localStorage.setItem(LS_ADDONS,    JSON.stringify(customAddons));
-    updateSaveIndicator();
-  } catch(e) {
-    console.warn('localStorage no disponible:', e);
+    localStorage.setItem(LS_NOTES,     JSON.stringify(notes));
+    localStorage.setItem(LS_CATALOG,   JSON.stringify(catalog));
+  } catch(e) { console.warn('localStorage error:', e); }
+
+  // Then sync to Supabase in background
+  if(supabaseConfigured) {
+    setSyncStatus('syncing');
+    const meta = { nextId, pkgNextId, catalogNextId };
+    Promise.all([
+      sbSet('clients',       clients),
+      sbSet('packages',      packagesData),
+      sbSet('custom_addons', customAddons),
+      sbSet('notes',         notes),
+      sbSet('catalog',       catalog),
+      sbSet('meta',          meta),
+    ]).then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
   }
+
+  updateSaveIndicator();
+}
+
+// Load from Supabase on startup (async)
+async function sbLoadAll() {
+  if(!supabaseConfigured) return false;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/app_data?select=key,value`, { headers: sbHeaders });
+    if(!res.ok) return false;
+    const rows = await res.json();
+    if(!rows.length) return false;
+
+    const byKey = {};
+    rows.forEach(r => byKey[r.key] = r.value);
+
+    // Only update if Supabase has data (non-empty arrays)
+    if(byKey.clients && byKey.clients.length > 0) {
+      clients      = migrateClients(byKey.clients);
+      localStorage.setItem(LS_CLIENTS, JSON.stringify(clients));
+    }
+    if(byKey.packages && byKey.packages.length > 0) {
+      packagesData = byKey.packages;
+      localStorage.setItem(LS_PACKAGES, JSON.stringify(packagesData));
+    }
+    if(byKey.custom_addons) {
+      customAddons = byKey.custom_addons;
+      localStorage.setItem(LS_ADDONS, JSON.stringify(customAddons));
+    }
+    if(byKey.notes) {
+      notes = byKey.notes;
+      localStorage.setItem(LS_NOTES, JSON.stringify(notes));
+    }
+    if(byKey.catalog) {
+      catalog = byKey.catalog;
+      localStorage.setItem(LS_CATALOG, JSON.stringify(catalog));
+    }
+    if(byKey.meta) {
+      nextId        = byKey.meta.nextId        || nextId;
+      pkgNextId     = byKey.meta.pkgNextId     || pkgNextId;
+      catalogNextId = byKey.meta.catalogNextId || catalogNextId;
+    }
+    return true;
+  } catch(e) {
+    console.warn('Supabase load error:', e);
+    return false;
+  }
+}
+
+function setSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  if(status === 'syncing') { el.textContent = '↑ Sincronizando…'; el.style.color = 'var(--gold)'; }
+  if(status === 'ok')      { el.textContent = '☁ Sincronizado';   el.style.color = 'var(--green)';
+    clearTimeout(el._t); el._t = setTimeout(() => { el.textContent = '☁ En la nube'; el.style.color = 'var(--text-muted)'; }, 3000); }
+  if(status === 'error')   { el.textContent = '⚠ Sin conexión (guardado local)'; el.style.color = 'var(--red)'; }
 }
 
 function updateSaveIndicator() {
@@ -1243,7 +1565,6 @@ function updateSaveIndicator() {
   const sideEl = document.getElementById('save-indicator');
   if(!el) return;
 
-  // Update sidebar text indicator
   const now = new Date();
   const hh = String(now.getHours()).padStart(2,'0');
   const mm = String(now.getMinutes()).padStart(2,'0');
@@ -1256,20 +1577,15 @@ function updateSaveIndicator() {
     sideEl._t = setTimeout(() => { sideEl.style.color = 'var(--text-muted)'; }, 3000);
   }
 
-  // Reset animation by cloning the element
   el.classList.remove('entering','leaving');
-  void el.offsetWidth; // force reflow
-
-  // Restart SVG animations by replacing strokes
+  void el.offsetWidth;
   el.querySelectorAll('.save-confirm-circle, .save-confirm-check, .save-confirm-ripple').forEach(s => {
     s.style.animation = 'none';
     void s.offsetWidth;
     s.style.animation = '';
   });
-
   clearTimeout(el._leaveTimer);
   el.classList.add('entering');
-
   el._leaveTimer = setTimeout(() => {
     el.classList.remove('entering');
     el.classList.add('leaving');
@@ -1284,7 +1600,10 @@ let clients      = _init.clients;
 let packagesData = _init.packagesData;
 let nextId       = _init.nextId;
 let pkgNextId    = _init.pkgNextId;
-let customAddons = _init.customAddons; // [{id, icon, name}]
+let customAddons = _init.customAddons;
+let notes        = _init.notes;
+let catalog      = _init.catalog;
+let catalogNextId = 500;
 let currentFilter = 'todos';
 let currentSearch = '';
 let editingId = null;
@@ -1313,6 +1632,8 @@ function showPage(name, btn) {
   if(name==='clientes') { populateYearFilter(); renderClients(); }
   if(name==='finanzas') { financeMonthFilter = null; renderFinanzas(); }
   if(name==='paquetes') renderPaquetes();
+  if(name==='catalogo') renderCatalog();
+  if(name==='notas')    renderNotes();
 }
 
 // ───── DASHBOARD ─────
@@ -1595,7 +1916,14 @@ function showClientDetail(id) {
       <div class="client-avatar-lg">${initials(c.name)}</div>
       <div class="client-info-main">
         <h2>${c.name}</h2>
-        <div style="color:var(--text-muted);font-size:13px;margin-top:4px">${c.phone} · ${typeLabel(c.type)}</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:4px;display:flex;align-items:center;gap:10px">
+          <span>${c.phone}</span>
+          ${c.phone ? `<a href="https://wa.me/${c.phone.replace(/\D/g,'')}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(76,175,125,0.12);border:1px solid rgba(76,175,125,0.3);color:var(--green);border-radius:20px;padding:3px 10px;font-size:11px;text-decoration:none;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s" onmouseover="this.style.background='rgba(76,175,125,0.22)'" onmouseout="this.style.background='rgba(76,175,125,0.12)'">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.527 5.845L0 24l6.335-1.506A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.964-1.356l-.356-.212-3.756.893.952-3.653-.232-.373A9.718 9.718 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+            Contactar
+          </a>` : ''}
+          · ${typeLabel(c.type)}
+        </div>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
           ${balance===0?'<span class="badge badge-paid">✓ Pagado</span>':'<span class="badge badge-pending">Pago pendiente: '+fmt(balance)+'</span>'}
           ${c.delivered
@@ -1674,8 +2002,15 @@ function showClientDetail(id) {
       </div>
       <div class="card">
         <div class="card-title">Resumen financiero</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--text-muted)">Total contrato</span><span>${fmt(c.total)}</span>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px">
+          <span style="color:var(--text-muted)">Servicio base</span><span>${fmt(c.baseTotal||c.total)}</span>
+        </div>
+        ${(c.clientItems||[]).length>0?`<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px">
+          <span style="color:var(--text-muted)">Productos (${(c.clientItems||[]).length})</span>
+          <span>${fmt((c.clientItems||[]).reduce((s,i)=>s+i.qty*i.price,0))}</span>
+        </div>`:''}
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-top:6px;border-top:1px solid var(--border)">
+          <span style="color:var(--text-muted)">Total contrato</span><span style="font-weight:500">${fmt(c.total)}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
           <span style="color:var(--text-muted)">Cobrado</span><span style="color:var(--green)">${fmt(c.paid)}</span>
@@ -1687,6 +2022,32 @@ function showClientDetail(id) {
         <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:right">${pct}% cobrado</div>
       </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">🛍 Productos y servicios adicionales</div>
+        <button class="btn btn-gold btn-sm" onclick="openClientItemModal(${c.id})">+ Agregar producto</button>
+      </div>
+      ${(c.clientItems||[]).length===0
+        ? `<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Sin productos adicionales</div>`
+        : `<table class="items-table">
+            <thead><tr><th>Descripción</th><th style="text-align:center">Cant.</th><th style="text-align:right">P. Unit.</th><th style="text-align:right">Subtotal</th><th></th></tr></thead>
+            <tbody>${(c.clientItems||[]).map(item=>`
+              <tr>
+                <td>${item.desc}</td>
+                <td style="text-align:center;color:var(--text-mid)">${item.qty}</td>
+                <td style="text-align:right;color:var(--text-mid)">${fmt(item.price)}</td>
+                <td class="item-total">${fmt(item.qty*item.price)}</td>
+                <td><button class="item-del" onclick="openClientItemModal(${c.id},'${item.id}')">✎</button></td>
+              </tr>`).join('')}
+            </tbody>
+            <tfoot><tr>
+              <td colspan="3" style="text-align:right;font-size:11px;color:var(--text-muted);padding:10px 10px 0;border-top:1px solid var(--border)">Total productos</td>
+              <td style="text-align:right;font-weight:600;color:var(--gold);padding:10px 10px 0;border-top:1px solid var(--border)">${fmt((c.clientItems||[]).reduce((s,i)=>s+i.qty*i.price,0))}</td>
+              <td style="border-top:1px solid var(--border)"></td>
+            </tr></tfoot>
+          </table>`}
     </div>
 
     <div class="card" style="margin-bottom:16px">
@@ -1895,11 +2256,47 @@ function renderFinanzas() {
   const pending   = total - paid;
   const completed = clients.filter(c=>c.paid===c.total).length;
 
+  // Monthly average — last 12 months with at least one event
+  const now = new Date();
+  const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+  const last12 = clients.filter(c => {
+    if(!c.date) return false;
+    const d = new Date(c.date + 'T12:00:00');
+    return d >= twelveMonthsAgo && d <= now;
+  });
+
+  // Group by month and sum totals
+  const monthMap = {};
+  last12.forEach(c => {
+    const d = new Date(c.date + 'T12:00:00');
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    monthMap[key] = (monthMap[key] || 0) + c.total;
+  });
+  const activeMonths = Object.values(monthMap);
+  const avgMonthly = activeMonths.length > 0
+    ? Math.round(activeMonths.reduce((s,v)=>s+v,0) / activeMonths.length)
+    : 0;
+  const avgLabel = activeMonths.length > 0
+    ? `Basado en ${activeMonths.length} mes${activeMonths.length!==1?'es':''} activo${activeMonths.length!==1?'s':''}`
+    : 'Sin datos del último año';
+
   document.getElementById('finance-stats').innerHTML = `
     <div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Total facturado</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--green)">${fmt(paid)}</div><div class="stat-label">Cobrado</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--gold)">${fmt(pending)}</div><div class="stat-label">Por cobrar</div></div>
     <div class="stat-card"><div class="stat-value">${completed}</div><div class="stat-label">Contratos liquidados</div></div>
+    <div class="stat-card" style="grid-column:span 2;border-left:3px solid var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="stat-value" style="color:var(--gold)">${fmt(avgMonthly)}</div>
+          <div class="stat-label">Promedio mensual — último año</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${avgLabel}</div>
+        </div>
+        <div class="stat-icon" style="background:var(--gold-dim)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+      </div>
+    </div>
   `;
 
   renderFinanzasSections();
@@ -2168,6 +2565,7 @@ function saveClient() {
     sessionDate:document.getElementById('f-session-date').value,
     galleryLink:document.getElementById('f-gallery').value.trim(),
     addons, total:formTotal,
+    baseTotal:formTotal,
     notes:document.getElementById('f-notes').value, status:'activo'
   };
   if(editingId){
@@ -2176,6 +2574,7 @@ function saveClient() {
     clients[idx]={...clients[idx],...data};
     // Keep paid in sync with payments history (don't overwrite with form value)
     recalcPaid(clients[idx]);
+    recalcTotal(clients[idx]);
     toast('Cliente actualizado ✓');
   } else {
     // New client: create payment record automatically if anticipo > 0
@@ -2190,7 +2589,7 @@ function saveClient() {
         note: ''
       });
     }
-    const newClient = {id:nextId++,...data, paid:formPaid, delivered:false, sessionDone:false, payments:initialPayments};
+    const newClient = {id:nextId++,...data, paid:formPaid, delivered:false, sessionDone:false, payments:initialPayments, clientItems:[]};
     clients.push(newClient);
     toast('Cliente agregado ✓');
   }
@@ -2563,6 +2962,7 @@ function resetData() {
     localStorage.removeItem(LS_NEXTID);
     localStorage.removeItem(LS_PKGNEXTID);
     localStorage.removeItem(LS_ADDONS);
+    localStorage.removeItem(LS_NOTES);
     location.reload();
   });
 }
@@ -2575,6 +2975,8 @@ function exportBackup() {
     clients,
     packagesData,
     customAddons,
+    catalog,
+    notes,
     nextId,
     pkgNextId,
   };
@@ -2610,6 +3012,8 @@ function importBackup(event) {
         clients      = data.clients      || [];
         packagesData = data.packagesData || [];
         customAddons = data.customAddons || [];
+        catalog      = data.catalog      || [];
+        notes        = data.notes        || [];
         nextId       = data.nextId       || (clients.length ? Math.max(...clients.map(c=>c.id)) + 1 : 1);
         pkgNextId    = data.pkgNextId    || 10;
         lsSave();
@@ -2771,12 +3175,367 @@ function calPopupGo(id) {
   showClientDetail(id);
 }
 
+// ───── CATALOG & CLIENT ITEMS ─────
+let _clientItemCounter = 2000;
+
+function recalcTotal(client) {
+  const itemsTotal = (client.clientItems || []).reduce((s, i) => s + i.qty * i.price, 0);
+  client.total = (client.baseTotal || 0) + itemsTotal;
+}
+
+// ── Catalog modal ──
+function openCatalogItemModal(editId) {
+  document.getElementById('ci-editing-id').value = editId || '';
+  document.getElementById('ci-delete-btn').style.display = editId ? 'block' : 'none';
+  document.getElementById('catalog-item-modal-title').textContent = editId ? 'Editar producto' : 'Nuevo producto / servicio';
+  if(editId) {
+    const item = catalog.find(x=>x.id===editId);
+    document.getElementById('ci-desc').value  = item?.description || '';
+    document.getElementById('ci-price').value = item?.unitPrice   || '';
+  } else {
+    document.getElementById('ci-desc').value  = '';
+    document.getElementById('ci-price').value = '';
+  }
+  document.getElementById('catalog-item-modal-overlay').classList.add('open');
+}
+
+function closeCatalogItemModal() {
+  document.getElementById('catalog-item-modal-overlay').classList.remove('open');
+}
+
+function saveCatalogItem() {
+  const desc  = document.getElementById('ci-desc').value.trim();
+  const price = Number(document.getElementById('ci-price').value) || 0;
+  if(!desc) { toast('⚠ Ingresa una descripción'); return; }
+  const editId = document.getElementById('ci-editing-id').value;
+  if(editId) {
+    const idx = catalog.findIndex(x=>x.id===editId);
+    if(idx>=0) catalog[idx] = {...catalog[idx], description:desc, unitPrice:price};
+    toast('Producto actualizado ✓');
+  } else {
+    catalog.push({id:'cat'+(catalogNextId++), description:desc, unitPrice:price});
+    toast('Producto agregado al catálogo ✓');
+  }
+  lsSave();
+  closeCatalogItemModal();
+  refreshCatalogSelect();
+  if(document.getElementById('page-catalogo').classList.contains('active')) renderCatalog();
+}
+
+function deleteCatalogItem() {
+  const editId = document.getElementById('ci-editing-id').value;
+  showConfirm('¿Eliminar este producto del catálogo?', 'Se eliminará del catálogo pero no afectará productos ya asignados a clientes.').then(ok => {
+    if(!ok) return;
+    catalog = catalog.filter(x=>x.id!==editId);
+    lsSave();
+    closeCatalogItemModal();
+    refreshCatalogSelect();
+    if(document.getElementById('page-catalogo').classList.contains('active')) renderCatalog();
+    toast('Producto eliminado del catálogo');
+  });
+}
+
+function refreshCatalogSelect() {
+  const sel = document.getElementById('cim-catalog-select');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Seleccionar del catálogo —</option>' +
+    catalog.map(item => `<option value="${item.id}" data-price="${item.unitPrice}">${item.description} — ${fmt(item.unitPrice)}</option>`).join('');
+  if(cur) sel.value = cur;
+}
+
+function renderCatalog() {
+  const countEl = document.getElementById('catalog-count-label');
+  if(countEl) countEl.textContent = `${catalog.length} producto${catalog.length!==1?'s':''} en catálogo`;
+  const tbody = document.getElementById('catalog-tbody');
+  if(!tbody) return;
+  if(catalog.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">
+      <div class="empty-state-icon">🛍</div>
+      <div class="empty-state-text">Sin productos aún. Agrega tu primer producto con el botón de arriba.</div>
+    </div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = catalog.map((item, idx) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:12px">${idx + 1}</td>
+      <td style="font-weight:500">${item.description}</td>
+      <td style="text-align:right;color:var(--gold);font-weight:500">${fmt(item.unitPrice)}</td>
+      <td style="text-align:right">
+        <button class="btn btn-outline btn-sm" onclick="openCatalogItemModal('${item.id}')">✎ Editar</button>
+      </td>
+    </tr>`).join('');
+}
+
+function onCatalogSelectChange() {
+  const sel = document.getElementById('cim-catalog-select');
+  const opt = sel.options[sel.selectedIndex];
+  if(sel.value) {
+    const item = catalog.find(x=>x.id===sel.value);
+    if(item) {
+      document.getElementById('cim-desc').value  = item.description;
+      document.getElementById('cim-price').value = item.unitPrice;
+      updateClientItemSubtotal();
+    }
+  }
+}
+
+function updateClientItemSubtotal() {
+  const qty   = Number(document.getElementById('cim-qty').value)   || 0;
+  const price = Number(document.getElementById('cim-price').value) || 0;
+  document.getElementById('cim-subtotal').textContent = fmt(qty * price);
+}
+
+// ── Client item modal ──
+function openClientItemModal(clientId, itemId) {
+  document.getElementById('cim-client-id').value = clientId;
+  document.getElementById('cim-item-id').value   = itemId || '';
+  document.getElementById('cim-delete-btn').style.display = itemId ? 'block' : 'none';
+  document.querySelector('#client-item-modal-overlay .btn-gold').textContent = itemId ? 'Guardar cambios' : 'Agregar al cliente';
+  document.getElementById('client-item-modal-title').textContent = itemId ? 'Editar producto' : 'Agregar producto';
+  refreshCatalogSelect();
+  if(itemId) {
+    const c    = clients.find(x=>x.id===clientId);
+    const item = (c?.clientItems||[]).find(x=>x.id===itemId);
+    document.getElementById('cim-catalog-select').value = '';
+    document.getElementById('cim-desc').value  = item?.desc  || '';
+    document.getElementById('cim-qty').value   = item?.qty   || 1;
+    document.getElementById('cim-price').value = item?.price || 0;
+  } else {
+    document.getElementById('cim-catalog-select').value = '';
+    document.getElementById('cim-desc').value  = '';
+    document.getElementById('cim-qty').value   = 1;
+    document.getElementById('cim-price').value = '';
+  }
+  updateClientItemSubtotal();
+  document.getElementById('client-item-modal-overlay').classList.add('open');
+}
+
+function closeClientItemModal() {
+  document.getElementById('client-item-modal-overlay').classList.remove('open');
+}
+
+function saveClientItem() {
+  const clientId = Number(document.getElementById('cim-client-id').value);
+  const itemId   = document.getElementById('cim-item-id').value;
+  const desc     = document.getElementById('cim-desc').value.trim();
+  const qty      = Number(document.getElementById('cim-qty').value)   || 1;
+  const price    = Number(document.getElementById('cim-price').value) || 0;
+  if(!desc) { toast('⚠ Ingresa una descripción'); return; }
+  const c = clients.find(x=>x.id===clientId);
+  if(!c) return;
+  if(!c.clientItems) c.clientItems = [];
+  if(itemId) {
+    const idx = c.clientItems.findIndex(x=>x.id===itemId);
+    if(idx>=0) c.clientItems[idx] = {...c.clientItems[idx], desc, qty, price};
+    toast('Producto actualizado ✓');
+  } else {
+    c.clientItems.push({id:'ci'+(_clientItemCounter++), desc, qty, price});
+    toast(`${desc} agregado ✓`);
+  }
+  recalcTotal(c);
+  lsSave();
+  closeClientItemModal();
+  showClientDetail(clientId);
+}
+
+function deleteClientItem() {
+  const clientId = Number(document.getElementById('cim-client-id').value);
+  const itemId   = document.getElementById('cim-item-id').value;
+  showConfirm('¿Eliminar este producto?', 'Se eliminará del cliente y se recalculará el total.').then(ok => {
+    if(!ok) return;
+    const c = clients.find(x=>x.id===clientId);
+    if(!c) return;
+    c.clientItems = (c.clientItems||[]).filter(x=>x.id!==itemId);
+    recalcTotal(c);
+    lsSave();
+    closeClientItemModal();
+    showClientDetail(clientId);
+    toast('Producto eliminado');
+  });
+}
+
+document.getElementById('catalog-item-modal-overlay').addEventListener('click', function(e){ if(e.target===this) closeCatalogItemModal(); });
+document.getElementById('client-item-modal-overlay').addEventListener('click',  function(e){ if(e.target===this) closeClientItemModal(); });
+
+// ───── NOTES ─────
+let noteNextId      = 1000;
+let activeNoteId    = null;
+let noteSearchQuery = '';
+let noteAutoTimer   = null;
+
+function fmtNoteDate(iso) {
+  if(!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}) +
+         ' ' + d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderNotes() {
+  const q = noteSearchQuery.toLowerCase();
+  const filtered = notes.filter(n =>
+    !q || n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)
+  ).sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+  document.getElementById('notes-count-label').textContent =
+    `${notes.length} nota${notes.length!==1?'s':''}`;
+
+  const listEl = document.getElementById('notes-list');
+  if(filtered.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center;padding:32px 12px;color:var(--text-muted);font-size:13px">
+      ${notes.length === 0 ? '📝 Aún no tienes notas. Crea una.' : '🔍 Sin resultados'}
+    </div>`;
+  } else {
+    listEl.innerHTML = filtered.map(n => {
+      const preview = n.body.replace(/\n/g,' ').trim().slice(0,60) || 'Sin contenido';
+      const isActive = n.id === activeNoteId;
+      return `<div class="note-item${isActive?' active':''}${n.color?' has-color':''}"
+        style="${n.color?`--note-color:${n.color}`:''}"
+        onclick="openNote(${n.id})">
+        <div class="note-item-title">${n.title || 'Sin título'}</div>
+        <div class="note-item-preview">${preview}</div>
+        <div class="note-item-date">${fmtNoteDate(n.updatedAt)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // If active note still exists, keep editor open; else show empty state
+  if(activeNoteId && notes.find(n => n.id === activeNoteId)) {
+    showNoteEditor(activeNoteId);
+  } else {
+    activeNoteId = null;
+    showNoteEmptyState();
+  }
+}
+
+function showNoteEmptyState() {
+  document.getElementById('notes-empty-state').style.display  = 'flex';
+  document.getElementById('notes-editor-content').style.display = 'none';
+}
+
+function showNoteEditor(id) {
+  const n = notes.find(x => x.id === id);
+  if(!n) return;
+  document.getElementById('notes-empty-state').style.display    = 'none';
+  document.getElementById('notes-editor-content').style.display = 'flex';
+  document.getElementById('note-title-input').value  = n.title;
+  document.getElementById('note-body-input').value   = n.body;
+  document.getElementById('note-color-select').value = n.color || '';
+  document.getElementById('note-meta').textContent   = `Creada: ${fmtNoteDate(n.createdAt)}  ·  Modificada: ${fmtNoteDate(n.updatedAt)}`;
+}
+
+function openNote(id) {
+  activeNoteId = id;
+  renderNotes();
+  showNoteEditor(id);
+}
+
+function newNote() {
+  const now = new Date().toISOString();
+  const n = { id: noteNextId++, title:'', body:'', color:'', createdAt: now, updatedAt: now };
+  notes.unshift(n);
+  activeNoteId = n.id;
+  lsSave();
+  renderNotes();
+  showNoteEditor(n.id);
+  setTimeout(() => document.getElementById('note-title-input')?.focus(), 50);
+}
+
+function scheduleNoteAutosave() {
+  clearTimeout(noteAutoTimer);
+  const ind = document.getElementById('note-autosave-indicator');
+  if(ind) { ind.textContent = '● Guardando…'; ind.style.color = 'var(--gold)'; }
+  noteAutoTimer = setTimeout(() => {
+    saveActiveNote(true);
+  }, 600); // 600ms debounce
+}
+
+function saveActiveNote(silent = false) {
+  if(!activeNoteId) return;
+  const n = notes.find(x => x.id === activeNoteId);
+  if(!n) return;
+  n.title     = document.getElementById('note-title-input').value;
+  n.body      = document.getElementById('note-body-input').value;
+  n.color     = document.getElementById('note-color-select').value;
+  n.updatedAt = new Date().toISOString();
+  lsSave();
+  // Update list item in place without full re-render (smooth UX)
+  const listItem = document.querySelector(`.note-item[onclick="openNote(${n.id})"]`);
+  if(listItem) {
+    listItem.querySelector('.note-item-title').textContent = n.title || 'Sin título';
+    const preview = n.body.replace(/\n/g,' ').trim().slice(0,60) || 'Sin contenido';
+    listItem.querySelector('.note-item-preview').textContent = preview;
+    listItem.querySelector('.note-item-date').textContent = fmtNoteDate(n.updatedAt);
+    listItem.style.setProperty('--note-color', n.color || '');
+    listItem.classList.toggle('has-color', !!n.color);
+  }
+  document.getElementById('note-meta').textContent =
+    `Creada: ${fmtNoteDate(n.createdAt)}  ·  Modificada: ${fmtNoteDate(n.updatedAt)}`;
+  const ind = document.getElementById('note-autosave-indicator');
+  if(ind) { ind.textContent = '● Guardado'; ind.style.color = 'var(--green)';
+    setTimeout(() => { ind.textContent = '● Guardado automático'; ind.style.color = 'var(--text-muted)'; }, 2000);
+  }
+}
+
+function onNoteTitleInput() { scheduleNoteAutosave(); }
+function onNoteBodyInput()  { scheduleNoteAutosave(); }
+function onNoteColorChange(){ saveActiveNote(true); renderNotes(); }
+
+function deleteActiveNote() {
+  if(!activeNoteId) return;
+  const n = notes.find(x => x.id === activeNoteId);
+  showConfirm('¿Eliminar esta nota?', `"${n?.title || 'Sin título'}" se eliminará permanentemente.`).then(ok => {
+    if(!ok) return;
+    notes = notes.filter(x => x.id !== activeNoteId);
+    activeNoteId = null;
+    lsSave();
+    renderNotes();
+    toast('Nota eliminada');
+  });
+}
+
+function filterNotes(q) {
+  noteSearchQuery = q;
+  renderNotes();
+}
+
 // ───── INIT ─────
-renderPaquetes();
-renderDashboard();
-renderCalendar();
-populateYearFilter();
-document.getElementById('dashboard-date').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+(async () => {
+  // Render immediately from localStorage so UI feels instant
+  renderPaquetes();
+  renderDashboard();
+  renderCalendar();
+  populateYearFilter();
+  document.getElementById('dashboard-date').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Show loading overlay while we check Supabase
+  const overlay = document.getElementById('loading-overlay');
+  const loadingText = document.getElementById('loading-text');
+
+  if(supabaseConfigured) {
+    loadingText.textContent = 'Sincronizando con la nube…';
+    const fromCloud = await sbLoadAll();
+    if(fromCloud) {
+      // Re-render with fresh cloud data
+      renderPaquetes();
+      renderDashboard();
+      renderCalendar();
+      populateYearFilter();
+      setSyncStatus('ok');
+    } else {
+      setSyncStatus('error');
+    }
+  } else {
+    // Not configured — show brief splash then dismiss
+    loadingText.textContent = 'Modo local';
+    document.getElementById('sync-status').textContent = '⚠ Sin nube configurada';
+    document.getElementById('sync-status').style.color = 'var(--text-muted)';
+  }
+
+  // Fade out loading overlay
+  overlay.style.opacity = '0';
+  setTimeout(() => overlay.style.display = 'none', 400);
+})();
 
 // ───── MOBILE NAV ─────
 function mobileNav(page) {
